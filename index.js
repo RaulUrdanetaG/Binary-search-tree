@@ -11,16 +11,28 @@ function createRandomArray() {
   return newArray;
 }
 let testArray = createRandomArray();
-console.log(testArray);
+// console.log(testArray);
 let binaryTree = new Tree([12, 22, 63, 89, 59, 77, 72, 49, 16, 10, 13]);
+// let binaryTree = new Tree(testArray);
 
 binaryTree.buildTree();
 binaryTree.print();
 
-binaryTree.insertToTree(21);
+binaryTree.insert(21);
 binaryTree.print();
 
-binaryTree.deleteFromTree(13);
+binaryTree.delete(13);
 binaryTree.print();
 
-binaryTree.findInTree(16);
+
+binaryTree.find(16);
+
+// binaryTree.levelOrder((node) => console.log(node.data));
+console.log(binaryTree.levelOrder());
+
+console.log(binaryTree.preOrder());
+// binaryTree.preOrder((node) => console.log(node.data));
+
+console.log(binaryTree.inOrder());
+
+console.log(binaryTree.postOrder());

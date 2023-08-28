@@ -6,7 +6,7 @@ export default class Tree {
     this.root = null;
   }
 
-  formatArray() {
+  #formatArray() {
     let array = this.array;
     let sortedArray = array.sort((a, b) => {
       return a - b;
@@ -16,7 +16,7 @@ export default class Tree {
     return formatedArray; // returns sorted array without duplicates
   }
 
-  arrayToBinaryTree(array, start, end) {
+  #arrayToBinaryTree(array, start, end) {
     if (start > end) {
       return null;
     }
@@ -24,15 +24,15 @@ export default class Tree {
     let mid = parseInt((start + end) / 2);
     let node = new Node(array[mid]);
 
-    node.left = this.arrayToBinaryTree(array, start, mid - 1);
-    node.right = this.arrayToBinaryTree(array, mid + 1, end);
+    node.left = this.#arrayToBinaryTree(array, start, mid - 1);
+    node.right = this.#arrayToBinaryTree(array, mid + 1, end);
 
     return node;
   }
 
   buildTree() {
-    let formatedArray = this.formatArray(this.array);
-    let binaryTree = this.arrayToBinaryTree(
+    let formatedArray = this.#formatArray(this.array);
+    let binaryTree = this.#arrayToBinaryTree(
       formatedArray,
       0,
       formatedArray.length - 1
@@ -41,41 +41,41 @@ export default class Tree {
     return this.root;
   }
 
-  insertToTree(newData) {
+  insert(newData) {
     let root = this.root;
-    this.insert(root, newData);
+    this.#insertToTree(root, newData);
   }
 
-  insert(root, newData) {
+  #insertToTree(root, newData) {
     if (root == null) {
       root = new Node(newData);
       return root;
     }
 
     if (newData < root.data) {
-      root.left = this.insert(root.left, newData);
+      root.left = this.#insertToTree(root.left, newData);
     } else if (newData > root.data) {
-      root.right = this.insert(root.right, newData);
+      root.right = this.#insertToTree(root.right, newData);
     }
 
     return root;
   }
 
-  deleteFromTree(data) {
+  delete(data) {
     let root = this.root;
-    this.delete(root, data);
+    this.#deleteFromTree(root, data);
   }
 
-  delete(root, data) {
+  #deleteFromTree(root, data) {
     if (root == null) {
       return root;
     }
     // traverse dow the tree
     if (data < root.data) {
-      root.left = this.delete(root.left, data);
+      root.left = this.#deleteFromTree(root.left, data);
       return root;
     } else if (data > root.data) {
-      root.right = this.delete(root.right, data);
+      root.right = this.#deleteFromTree(root.right, data);
       return root;
     }
     // whe it finds the value search
@@ -108,25 +108,97 @@ export default class Tree {
     }
   }
 
-  findInTree(data) {
+  find(data) {
     let root = this.root;
-    this.find(root, data);
+    this.#findInTree(root, data);
   }
 
-  find(root, data) {
+  #findInTree(root, data) {
     if (root == null) {
       return root;
     }
     // traverse dow the tree
     if (data < root.data) {
-      root.left = this.find(root.left, data);
+      root.left = this.#findInTree(root.left, data);
       return root;
     } else if (data > root.data) {
-      root.right = this.find(root.right, data);
+      root.right = this.#findInTree(root.right, data);
       return root;
     }
     this.prettyPrint(root);
     return root;
+  }
+
+  levelOrder(fcn) {
+    if (!this.root) return [];
+
+    let queue = [this.root];
+    let result = [];
+
+    while (queue.length != 0) {
+      let level = [];
+      let size = queue.length;
+
+      for (let i = 0; i < size; i++) {
+        const node = queue.shift();
+        level.push(node.data);
+
+        if (node.left) queue.push(node.left);
+        if (node.right) queue.push(node.right);
+        if (fcn) fcn(node);
+      }
+
+      result.push(level);
+    }
+    if (!fcn) return result;
+  }
+
+  // data left right
+  preOrder(fcn) {
+    return this.#preOrderFcn(this.root, fcn);
+  }
+
+  #preOrderFcn(node, fcn, result = []) {
+    if (node == null) return [];
+
+    result.push(node.data);
+    if (fcn) fcn(node);
+    this.#preOrderFcn(node.left, fcn, result);
+    this.#preOrderFcn(node.right, fcn, result);
+
+    if (!fcn) return result;
+  }
+
+  //left data right
+  inOrder(fcn) {
+    return this.#inOrderFcn(this.root, fcn);
+  }
+
+  #inOrderFcn(node, fcn, result = []) {
+    if (node == null) return;
+
+    this.#inOrderFcn(node.left, fcn, result);
+    result.push(node.data);
+    if (fcn) fcn(node);
+    this.#inOrderFcn(node.right, fcn, result);
+
+    if (!fcn) return result;
+  }
+
+  //left right data
+  postOrder(fcn) {
+    return this.#postOrderFcn(this.root, fcn);
+  }
+
+  #postOrderFcn(node, fcn, result = []) {
+    if (node == null) return;
+
+    this.#postOrderFcn(node.left, fcn, result);
+    this.#postOrderFcn(node.right, fcn, result);
+    result.push(node.data);
+    if (fcn) fcn(node);
+
+    if (!fcn) return result;
   }
 
   print() {
