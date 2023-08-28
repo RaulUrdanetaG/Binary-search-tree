@@ -41,41 +41,31 @@ export default class Tree {
     return this.root;
   }
 
-  insert(newData) {
-    let root = this.root;
-    this.#insertToTree(root, newData);
-  }
-
-  #insertToTree(root, newData) {
+  insert(newData, root = this.root) {
     if (root == null) {
       root = new Node(newData);
       return root;
     }
 
     if (newData < root.data) {
-      root.left = this.#insertToTree(root.left, newData);
+      root.left = this.insert(newData, root.left);
     } else if (newData > root.data) {
-      root.right = this.#insertToTree(root.right, newData);
+      root.right = this.insert(newData, root.right);
     }
 
     return root;
   }
 
-  delete(data) {
-    let root = this.root;
-    this.#deleteFromTree(root, data);
-  }
-
-  #deleteFromTree(root, data) {
+  delete(data, root = this.root) {
     if (root == null) {
       return root;
     }
     // traverse dow the tree
     if (data < root.data) {
-      root.left = this.#deleteFromTree(root.left, data);
+      root.left = this.delete(data, root.left);
       return root;
     } else if (data > root.data) {
-      root.right = this.#deleteFromTree(root.right, data);
+      root.right = this.delete(data, root.right);
       return root;
     }
     // whe it finds the value search
@@ -108,25 +98,16 @@ export default class Tree {
     }
   }
 
-  find(data) {
-    let root = this.root;
-    this.#findInTree(root, data);
-  }
+  find(data, root = this.root) {
+    if (root === null || root.data === data) {
+      return root;
+    }
 
-  #findInTree(root, data) {
-    if (root == null) {
-      return root;
-    }
-    // traverse dow the tree
+    // Access root's children if value not found;
     if (data < root.data) {
-      root.left = this.#findInTree(root.left, data);
-      return root;
-    } else if (data > root.data) {
-      root.right = this.#findInTree(root.right, data);
-      return root;
+      return this.find(data, root.left);
     }
-    this.prettyPrint(root);
-    return root;
+    return this.find(data, root.right);
   }
 
   levelOrder(fcn) {
@@ -154,63 +135,86 @@ export default class Tree {
   }
 
   // data left right
-  preOrder(fcn) {
-    return this.#preOrderFcn(this.root, fcn);
-  }
-
-  #preOrderFcn(node, fcn, result = []) {
+  preOrder(fcn, node = this.root, result = []) {
     if (node == null) return [];
 
     result.push(node.data);
     if (fcn) fcn(node);
-    this.#preOrderFcn(node.left, fcn, result);
-    this.#preOrderFcn(node.right, fcn, result);
+    this.preOrder(fcn, node.left, result);
+    this.preOrder(fcn, node.right, result);
 
     if (!fcn) return result;
   }
 
   //left data right
-  inOrder(fcn) {
-    return this.#inOrderFcn(this.root, fcn);
-  }
-
-  #inOrderFcn(node, fcn, result = []) {
+  inOrder(fcn, node = this.root, result = []) {
     if (node == null) return;
 
-    this.#inOrderFcn(node.left, fcn, result);
+    this.inOrder(fcn, node.left, result);
     result.push(node.data);
     if (fcn) fcn(node);
-    this.#inOrderFcn(node.right, fcn, result);
+    this.inOrder(fcn, node.right, result);
 
     if (!fcn) return result;
   }
 
   //left right data
-  postOrder(fcn) {
-    return this.#postOrderFcn(this.root, fcn);
-  }
-
-  #postOrderFcn(node, fcn, result = []) {
+  postOrder(fcn, node = this.root, result = []) {
     if (node == null) return;
 
-    this.#postOrderFcn(node.left, fcn, result);
-    this.#postOrderFcn(node.right, fcn, result);
+    this.postOrder(fcn, node.left, result);
+    this.postOrder(fcn, node.right, result);
     result.push(node.data);
     if (fcn) fcn(node);
 
     if (!fcn) return result;
   }
 
-  print() {
-    this.prettyPrint(this.root);
+  height(node = this.root) {
+    if (node === null) return 0;
+    const leftHeight = this.height(node.left);
+    const rightHeight = this.height(node.right);
+    return Math.max(leftHeight, rightHeight) + 1;
   }
 
-  prettyPrint(node, prefix = "", isLeft = true) {
+  depth(node, root = this.root, level = 0) {
+    if (root == null) return -1;
+
+    if (node.data < root.data) {
+      return this.depth(node, root.left, level + 1);
+    } else if (node.data > root.data) {
+      return this.depth(node, root.right, level + 1);
+    }
+    if (node.data == root.data) {
+      return level;
+    }
+  }
+
+  isBalanced() {
+    let root = this.root;
+
+    if (this.height(root.left) == this.height(root.right)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  reBalance() {
+    this.array = this.inOrder();
+    this.buildTree();
+  }
+
+  print() {
+    this.#prettyPrint(this.root);
+  }
+
+  #prettyPrint(node, prefix = "", isLeft = true) {
     if (node === null) {
       return;
     }
     if (node.right !== null) {
-      this.prettyPrint(
+      this.#prettyPrint(
         node.right,
         `${prefix}${isLeft ? "│   " : "    "}`,
         false
@@ -218,7 +222,11 @@ export default class Tree {
     }
     console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.data}`);
     if (node.left !== null) {
-      this.prettyPrint(node.left, `${prefix}${isLeft ? "    " : "│   "}`, true);
+      this.#prettyPrint(
+        node.left,
+        `${prefix}${isLeft ? "    " : "│   "}`,
+        true
+      );
     }
   }
 }
